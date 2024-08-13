@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Operations - Math Help</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .result-container {
+            width: 100%;
+            height: auto;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="result-container" id="result-container"></div>
+<script>
+    function printMatrix(matrix) {
+        const resultContainer = document.getElementById("result-container");
+        let matrixHTML = "<table>";
+        for (let i = 0; i < matrix.length; i++) {
+            matrixHTML += "<tr>";
+            for (let j = 0; j < matrix[i].length; j++) {
+                matrixHTML += `<td>${matrix[i][j].toFixed(2)}</td>`;
+            }
+            matrixHTML += "</tr>";
+        }
+        matrixHTML += "</table><br>"; // Add a line break between matrices
+        resultContainer.innerHTML += matrixHTML; // Append the matrix to the container
+    }
+
+    // Example matrix for demonstration
+    const matrix = [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+    ];
+
+    // Display the matrix
+    printMatrix(matrix);
+</script>
+</body>
+</html>

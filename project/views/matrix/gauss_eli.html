@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Operations - Math Help</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/gauss_eli.css">
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+<header class="header">
+    <div class="logo">
+        <img src="/static/img/logo.jpg" alt="MathHelp Logo">
+    </div>
+    <nav class="nav">
+        <ul>
+            <li><a href="/integration">Integration</a></li>
+            <li><a href="/derivative">Derivative</a></li>
+            <li><a href="/matrix">Matrix</a></li>
+            <li><a href="/about">About Us</a></li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+    <h2>Matrix Operations</h2>
+    <div class="matrix-input-container">
+        <p>Enter the size of the matrix:</p>
+        <input type="number" id="matrix-rows" class="matrix-input" min="1" max="10" placeholder="n">
+        <span> x </span>
+        <input type="number" id="matrix-cols" class="matrix-input" min="1" max="10" placeholder="m">
+    </div>
+
+    <div class="generate-button-container">
+        <button class="generate-button" onclick="generateMatrix()">Generate Matrix</button>
+    </div>
+
+    <div class="your-matrix-container" id="your-matrix-container">
+        <span class="your-matrix-label">Your Matrix:</span>
+        <div id="matrix-container" class="matrix-container"></div>
+    </div>
+
+    <div class="generate-button-container">
+        <button class="generate-button" onclick="runGaussianElimination()">Run Gaussian Elimination</button>
+    </div>
+
+    <div class="result-container" id="result-container"></div>
+</main>
+<footer>
+    <p>&copy; 2024 Math Help</p>
+</footer>
+<script>
+    
+    function generateMatrix() {
+        var rows = document.getElementById("matrix-rows").value;
+        var cols = document.getElementById("matrix-cols").value;
+        var matrixContainer = document.getElementById("matrix-container");
+        var yourMatrixContainer = document.getElementById("your-matrix-container");
+
+        matrixContainer.innerHTML = "";
+
+        if (rows < 1 || rows > 10 || cols < 1 || cols > 10) {
+            alert("Please enter row and column values between 1 and 10.");
+            return;
+        }
+
+        var matrixHTML = "<table>";
+        for (var i = 0; i < rows; i++) {
+            matrixHTML += "<tr>";
+            for (var j = 0; j < cols; j++) {
+                matrixHTML += `<td><input type='text' class='matrix-input' id='matrix-input_${i}_${j}'></td>`;
+            }
+            matrixHTML += "</tr>";
+        }
+        matrixHTML += "</table>";
+
+        matrixContainer.innerHTML = matrixHTML;
+        yourMatrixContainer.style.display = "flex";
+    }
+
+    function runGaussianElimination() {
+        const rows = parseInt(document.getElementById("matrix-rows").value);
+        const cols = parseInt(document.getElementById("matrix-cols").value);
+
+        if (cols !== rows + 1) {
+            alert("For Gaussian elimination, the matrix must be n x (n+1).");
+            return;
+        }
+
+        const matrix = [];
+        for (let i = 0; i < rows; i++) {
+            const row = [];
+            for (let j = 0; j < cols; j++) {
+                const inputId = `matrix-input_${i}_${j}`;
+                const inputValue = parseFloat(document.getElementById(inputId).value);
+                row.push(inputValue);
+            }
+            matrix.push(row);
+        }
+
+        const result = gaussianElimination(matrix);
+
+        const resultContainer = document.getElementById("result-container").innerHTML;
+        resultContainer.innerHTML = "";
+        if (result === undefined) {
+            resultContainer.innerText = "Gaussian Elimination failed.";
+        } else {
+            let resultText = "<b>Result:</b><br>";
+            for (let i = 0; i < result.length; i++) {
+                resultText += `x${i + 1} = ${result[i].toFixed(2)}<br>`;
+            }
+            resultContainer.innerHTML = resultText;
+        }
+    }
+
+    function gaussianElimination(matrix) {
+        const n = matrix.length;
+        const resultContainer = document.getElementById("result-container");
+
+        // Clear the result container at the start of each run
+        resultContainer.innerHTML = "<b>Solution:</b><br>";
+        
+        for (let i = 0; i < n; i++) {
+            let maxRow = i;
+            for (let j = i + 1; j < n; j++) {
+                if (Math.abs(matrix[j][i]) > Math.abs(matrix[maxRow][i])) {
+                    maxRow = j;
+                }
+            }
+            // Swapping rows
+            swapRows(matrix, i, maxRow);
+            printMatrix(matrix, "R_{" + (i + 1) + "} \\Longleftrightarrow R_{" + (maxRow + 1) + "}"
+);
+
+            // Elimination step
+            for (let j = i + 1; j < n; j++) {
+                const factor = (matrix[j][i] / matrix[i][i]).toFixed(5); // Apply toFixed(5) here
+                for (let k = i; k < n + 1; k++) {
+                    matrix[j][k] -= parseFloat(factor) * matrix[i][k]; // Convert factor back to number for calculation
+                }
+                printMatrix(matrix, "R_{" + (j + 1) + "} = " + factor + " \\times R_{" + (i + 1) + "} - R_{" + (j + 1) + "}");
+            }
+
+        }
+
+        const solution = [];
+        for (let i = n - 1; i >= 0; i--) {
+            let sum = 0;
+            for (let j = i + 1; j < n; j++) {
+                sum += matrix[i][j] * matrix[j][n]; // Corrected: Use matrix[j][n] instead of solution[j]
+            }
+            solution[i] = (matrix[i][n] - sum) / matrix[i][i];
+        }
+
+        // Display the solution in LaTeX format
+        const solutionContainer = document.getElementById("result-container");
+        solutionContainer.innerHTML += "<b>Solution:</b><br>";
+        let solutionLaTeX = "\\begin{equation*} \\begin{aligned}";
+        for (let i = 0; i < solution.length; i++) {
+            // Append each equation with an ampersand (&) to align them
+            solutionLaTeX += `x_{${i + 1}} &= ${solution[i].toFixed(2)} \\\\`;
+        }
+        solutionLaTeX += "\\end{aligned} \\end{equation*}";
+
+        // Wrap the entire block of equations in LaTeX delimiters for display mode
+        solutionContainer.innerHTML += "$$" + solutionLaTeX + "$$";
+        MathJax.typesetPromise([solutionContainer]);
+
+        return solution;
+    }
+
+    function swapRows(matrix, row1, row2) {
+        const temp = matrix[row1];
+        matrix[row1] = matrix[row2];
+        matrix[row2] = temp;
+    }
+
+    function printMatrix(matrix, operationDescription) {
+    const resultContainer = document.getElementById("result-container");
+    
+    // Display the operation description
+    if (operationDescription) {
+        // Wrap the operation description in LaTeX delimiters
+        const latexDescription = `\\(${operationDescription}\\)`;
+        resultContainer.innerHTML += `<p>${latexDescription}</p>`;
+    }
+    
+    // Display the matrix
+    let matrixLaTeX = "\\begin{bmatrix}";
+    for (let i = 0; i < matrix.length; i++) {
+        for (let j = 0; j < matrix[i].length; j++) {
+            // Check if the number is an integer
+            if (Number.isInteger(matrix[i][j])) {
+                matrixLaTeX += matrix[i][j]; // Format without decimals
+            } else {
+                matrixLaTeX += matrix[i][j].toFixed(2); // Keep decimal places
+            }
+            if (j < matrix[i].length - 1) {
+                matrixLaTeX += " & ";
+            }
+        }
+        if (i < matrix.length - 1) {
+            matrixLaTeX += " \\\\ ";
+        }
+    }
+    matrixLaTeX += "\\end{bmatrix}";
+    
+    // Wrap the matrix in LaTeX delimiters
+    const latexMatrix = `\\(${matrixLaTeX}\\)`;
+    resultContainer.innerHTML += `<p>${latexMatrix}</p>`;
+    
+    // Render MathJax after MathJax has finished loading and initializing
+    MathJax.typesetPromise([resultContainer]);
+}
+</script>
+</body>
+</html>

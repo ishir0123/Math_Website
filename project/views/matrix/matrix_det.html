@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Determinant - Math Help</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/gauss_eli.css">
+</head>
+<body>
+<header class="header">
+    <div class="logo">
+        <img src="/static/img/logo.jpg" alt="MathHelp Logo">
+    </div>
+    <nav class="nav">
+        <ul>
+            <li><a href="/integration">Integration</a></li>
+            <li><a href="/derivative">Derivative</a></li>
+            <li><a href="/matrix">Matrix </a></li>
+            <li><a href="/about">About Us</a></li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+    <h2>Matrix Determinant</h2>
+    <div class="matrix-input-container">
+        <p>Enter the size of the matrix (2-6):</p>
+        <input type="number" id="matrix-size" class="matrix-input" min="2" max="6" placeholder="n">
+    </div>    
+    <div class="generate-button-container">
+        <button class="generate-button" onclick="generateMatrix()">Generate Matrix</button>
+    </div>
+    <div class="matrix-container-wrapper">
+        <div class="matrix-container" id="matrix-container">
+            <span class="matrix-label"></span>
+            <div id="matrix-1" class="matrix"></div>
+        </div>
+    </div>
+
+    <div class="generate-button-container">
+        <button class="generate-button" onclick="calculateDeterminant()">Calculate Determinant</button>
+    </div>
+
+    <div class="result-container" id="result-container" style="border: 2px solid blue; box-sizing: border-box;">
+    </div>
+</main>
+<footer>
+    <p>&copy; 2024 Math Help</p>
+</footer>
+<script>
+    function generateMatrix() {
+    const size = parseInt(document.getElementById("matrix-size").value);
+
+    if (size < 2 || size > 6) {
+        alert("Please enter a matrix size between 2 and 6.");
+        return;
+    }
+
+    const matrixContainer = document.getElementById("matrix-1");
+    matrixContainer.innerHTML = "";
+
+    let matrixHTML = "<table>";
+    for (let i = 0; i < size; i++) {
+        matrixHTML += "<tr>";
+        for (let j = 0; j < size; j++) {
+            matrixHTML += `<td><input type='text' class='matrix-input' id='matrix-1_${i}_${j}'></td>`;
+        }
+        matrixHTML += "</tr>";
+    }
+    matrixHTML += "</table>";
+
+    matrixContainer.innerHTML = matrixHTML;
+}
+
+function calculateDeterminant() {
+    const size = parseInt(document.getElementById("matrix-size").value);
+    const matrix = [];
+
+    // Read values from input fields and populate matrix
+    for (let i = 0; i < size; i++) {
+        matrix[i] = [];
+        for (let j = 0; j < size; j++) {
+            const value = parseFloat(document.getElementById(`matrix-1_${i}_${j}`).value);
+            if (isNaN(value)) {
+                alert("Please enter valid numbers in all matrix cells.");
+                return;
+            }
+            matrix[i][j] = value;
+        }
+    }
+        // Clear the result-container before displaying new results
+        document.getElementById("result-container").innerHTML = '';
+
+        // Display Matrix A as "A="
+        const matrixAElement = document.createElement('div');
+        matrixAElement.innerHTML = `\\[ \\mathbf{A} = ${matrixToString(matrix)} \\]`;
+        document.getElementById("result-container").appendChild(matrixAElement);
+
+        // Ensure MathJax is fully loaded before processing the LaTeX code
+        MathJax.startup.promise.then(() => {
+            MathJax.typesetPromise([matrixAElement]);
+        }).catch((err) => console.log(err));
+
+        // Calculate the determinant
+        let determinant = 0;
+        if (size === 2) {
+            determinant = matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+        } else if (size === 3) {
+            determinant = matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1]) -
+                        matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0]) +
+                        matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0]);
+        }
+        // Display the determinant
+        const determinantElement = document.createElement('div');
+        determinantElement.innerHTML = `\\[ \\text{Determinant of } \\mathbf{A} = ${determinant} \\]`;
+        document.getElementById("result-container").appendChild(determinantElement);
+
+        // Ensure MathJax is fully loaded before processing the LaTeX code
+        MathJax.startup.promise.then(() => {
+            MathJax.typesetPromise([determinantElement]);
+        }).catch((err) => console.log(err));
+    }
+
+    // Helper function to convert a matrix to a string format for LaTeX
+    function matrixToString(matrix) {
+        let matrixString = "\\begin{bmatrix}\n";
+        for (let i = 0; i < matrix.length; i++) {
+            matrixString += matrix[i].join(" & ") + " \\\\\n";
+        }
+        matrixString += "\\end{bmatrix}";
+        return matrixString;
+    }
+</script>

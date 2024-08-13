@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Help</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <script>
+        function generateMatrix() {
+            var rows = parseInt(document.getElementById("matrix-rows").value);
+            var cols = parseInt(document.getElementById("matrix-cols").value);
+            var matrixContainer = document.getElementById("generated-matrix-container");
+
+            matrixContainer.innerHTML = "";
+
+            if (isNaN(rows) || isNaN(cols) || rows < 1 || rows > 10 || cols < 1 || cols > 10) {
+                alert("Please enter row and column values between 1 and 10.");
+                return;
+            }
+
+            var matrixHTML = "<table>";
+            for (var i = 0; i < rows; i++) {
+                matrixHTML += "<tr>";
+                for (var j = 0; j < cols; j++) {
+                    matrixHTML += `<td><input type='text' class='matrix-input' id='matrix-input_${i}_${j}'></td>`;
+                }
+                matrixHTML += "</tr>";
+            }
+            matrixHTML += "</table>";
+
+            matrixContainer.innerHTML = matrixHTML;
+        }
+
+        function printMatrix() {
+    var rows = parseInt(document.getElementById("matrix-rows").value);
+    var cols = parseInt(document.getElementById("matrix-cols").value);
+    var printedMatrixContainer = document.getElementById("printed-matrix-container");
+
+    var matrixLaTeX = "\\begin{bmatrix}";
+    for (var i = 0; i < rows; i++) {
+        for (var j = 0; j < cols; j++) {
+            var inputId = "matrix-input_" + i + "_" + j;
+            var inputValue = document.getElementById(inputId).value;
+            matrixLaTeX += inputValue;
+            if (j < cols - 1) {
+                matrixLaTeX += " & ";
+            }
+        }
+        if (i < rows - 1) {
+            matrixLaTeX += " \\\\ ";
+        }
+    }
+    matrixLaTeX += "\\end{bmatrix}";
+
+    printedMatrixContainer.innerHTML = "";
+
+    // Create a temporary span element to hold the LaTeX code
+    var tempSpan = document.createElement("span");
+    tempSpan.textContent = matrixLaTeX;
+
+    // Append the span element to the printedMatrixContainer
+    printedMatrixContainer.appendChild(tempSpan);
+
+    // Render MathJax after MathJax has finished loading and initializing
+    MathJax.typeset([tempSpan], function() {
+        // Remove the temporary span element after MathJax has typeset it
+        printedMatrixContainer.removeChild(tempSpan);
+    });
+}
+
+    </script>
+</head>
+<body>
+<main class="main">
+    <h2>Integration Help</h2>
+    <div class="matrix-input-container">
+        <p>Enter the size of the matrix:</p>
+        <input type="number" id="matrix-rows" class="matrix-input" min="1" max="10" placeholder="n">
+        <span> x </span>
+        <input type="number" id="matrix-cols" class="matrix-input" min="1" max="10" placeholder="m">
+    </div>
+    <div class="generate-button-container">
+        <button class="generate-button" onclick="generateMatrix()">Generate Matrix</button>
+    </div>
+    <div id="generated-matrix-container"></div>
+    <div class="generate-button-container">
+        <button class="generate-button" onclick="printMatrix()">Print Matrix (LaTeX)</button>
+    </div>
+    <div id="printed-matrix-container"></div>
+</main>
+</body>
+</html>

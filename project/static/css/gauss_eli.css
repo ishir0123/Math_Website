@@ -1,0 +1,145 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #f3f4f6;
+}
+
+.header {
+    text-align: center;
+    padding: 20px;
+    background-color: #40407a;
+    color: #ffffff;
+}
+
+.logo img {
+    width: auto;
+    height: 120px;
+}
+
+.nav {
+    margin-top: 5px;
+}
+
+.nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav li {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+.nav li a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.nav li a:hover {
+    color: #e94560;
+}
+
+.main {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    font-size: 18px;
+    line-height: 1.6;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center; /* Center the content */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center horizontally */
+}
+
+footer {
+    padding: 10px;
+    text-align: center;
+    margin-top: 20px;
+    background-color: #40407a;
+    color: #ffffff;
+    font-size: 14px;
+    border-top: 2px solid #e94560;
+}
+
+footer p {
+    margin: 0;
+}
+
+/* Additional styles for matrix */
+.matrix-input {
+    width: 30px;
+    height: 25px;
+    text-align: center;
+}
+
+.matrix-input-container {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center the content horizontally */
+    margin-bottom: 10px;
+}
+
+.matrix-input-label {
+    margin-right: 10px;
+}
+
+.matrix-container {
+    margin-top: 20px;
+    text-align: left; /* Align the generated matrix to the left */
+}
+
+.generate-button-container {
+    margin-top: 10px;
+    text-align: center; /* Center the button */
+}
+
+.generate-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.generate-button:hover {
+    background-color: #0056b3;
+}
+
+/* New styles for "Your Matrix" */
+.your-matrix-container {
+    display: none; /* Initially hide the container */
+    align-items: center;
+    margin-bottom: 10px;
+    text-align: left;
+}
+.your-matrix-label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+.result-container {
+    width: 100%;
+    max-width: 800px; /* Adjust the maximum width as needed */
+    margin: 20px auto; /* Center the container */
+    padding: 20px;
+    background-color: #ffff; /* Background color */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Slight shadow for depth */
+    text-align: center; /* Align text to the left */
+    overflow-y: auto; /* Enable scrolling if content overflows */
+    font-size: 18px; /* Adjust the font size as needed */
+    border: 2px solid blue;
+    box-sizing: border-box;
+    }
+.mjx-chtml {
+    font-size: 60px !important; /* Adjust the font size of the rendered math */
+   }

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Transpose - Math Help</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/gauss_eli.css">
+</head>
+<body>
+<header class="header">
+    <div class="logo">
+        <img src="/static/img/logo.jpg" alt="MathHelp Logo">
+    </div>
+    <nav class="nav">
+        <ul>
+            <li><a href="/integration">Integration</a></li>
+            <li><a href="/derivative">Derivative</a></li>
+            <li><a href="/matrix">Matrix </a></li>
+            <li><a href="/about">About Us</a></li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+    <h2>Matrix Transpose</h2>
+    <div class="matrix-input-container">
+        <p>Enter the size of the matrix:</p>
+        <input type="number" id="matrix-rows" class="matrix-input" min="1" max="10" placeholder="n">
+        <span> x </span>
+        <input type="number" id="matrix-cols" class="matrix-input" min="1" max="10" placeholder="m">
+    </div>
+    <div class="generate-button-container">
+        <button class="generate-button" onclick="generateMatrix()">Generate Matrix</button>
+    </div>
+    <div class="matrix-container-wrapper">
+        <div class="matrix-container" id="matrix-container">
+            <span class="matrix-label"></span>
+            <div id="matrix-1" class="matrix"></div>
+        </div>
+    </div>
+
+    <div class="generate-button-container">
+        <button class="generate-button" onclick="transposeMatrix()">Transpose Matrix</button>
+    </div>
+
+    <div class="result-container" id="result-container" style="border: 2px solid blue; box-sizing: border-box;">
+    </div>
+</main>
+<footer>
+    <p>&copy; 2024 Math Help</p>
+</footer>
+<script>
+    function generateMatrix() {
+        const rows = parseInt(document.getElementById("matrix-rows").value);
+        const cols = parseInt(document.getElementById("matrix-cols").value);
+
+        if (rows < 1 || rows > 10 || cols < 1 || cols > 10) {
+            alert("Please enter row and column values between 1 and 10.");
+            return;
+        }
+
+        const matrixContainer = document.getElementById("matrix-1");
+        matrixContainer.innerHTML = "";
+
+        let matrixHTML = "<table>";
+        for (let i = 0; i < rows; i++) {
+            matrixHTML += "<tr>";
+            for (let j = 0; j < cols; j++) {
+                matrixHTML += `<td><input type='text' class='matrix-input' id='matrix-1_${i}_${j}'></td>`;
+            }
+            matrixHTML += "</tr>";
+        }
+        matrixHTML += "</table>";
+
+        matrixContainer.innerHTML = matrixHTML;
+    }
+
+    function transposeMatrix() {
+        console.log("transposeMatrix called"); // Debugging line
+        const rows = parseInt(document.getElementById("matrix-rows").value);
+        const cols = parseInt(document.getElementById("matrix-cols").value);
+
+        const matrix = [];
+
+        // Read values from input fields and populate matrix
+        for (let i = 0; i < rows; i++) {
+            matrix[i] = [];
+            for (let j = 0; j < cols; j++) {
+                const value = parseFloat(document.getElementById(`matrix-1_${i}_${j}`).value);
+                console.log(`matrix-1_${i}_${j}: ${value}`); // Debugging line
+                if (isNaN(value)) {
+                    alert("Please enter valid numbers in all matrix cells.");
+                    return;
+                }
+                matrix[i][j] = value;
+            }
+        }
+
+        // Clear the result-container before displaying new results
+        document.getElementById("result-container").innerHTML = '';
+
+        // Display Matrix A as "A="
+        const matrixAElement = document.createElement('div');
+        matrixAElement.innerHTML = `\\[ \\mathbf{A} = ${matrixToString(matrix)} \\]`;
+        document.getElementById("result-container").appendChild(matrixAElement);
+
+        // Ensure MathJax is fully loaded before processing the LaTeX code
+        MathJax.startup.promise.then(() => {
+            MathJax.typesetPromise([matrixAElement]);
+        }).catch((err) => console.log(err));
+
+        // Transpose the matrix
+        const transposedMatrix = transpose(matrix);
+        const transposedMatrixString = matrixToString(transposedMatrix);
+
+        // Print the transposed matrix "A^T="
+        const transposedExpressionElement = document.createElement('div');
+        transposedExpressionElement.innerHTML = `\\[ \\mathbf{A}^T = ${transposedMatrixString} \\]`;
+        document.getElementById("result-container").appendChild(transposedExpressionElement);
+
+        // Ensure MathJax is fully loaded before processing the LaTeX code
+        MathJax.startup.promise.then(() => {
+            MathJax.typesetPromise([transposedExpressionElement]);
+        }).catch((err) => console.log(err));
+    }
+
+    // Helper function to convert a matrix to a string format for LaTeX
+    function matrixToString(matrix) {
+        let matrixString = "\\begin{bmatrix}\n";
+        for (let i = 0; i < matrix.length; i++) {
+            matrixString += matrix[i].join(" & ") + " \\\\\n";
+        }
+        matrixString += "\\end{bmatrix}";
+        return matrixString;
+    }
+
+    // Helper function to transpose a matrix
+    function transpose(matrix) {
+        const result = [];
+        for (let i = 0; i < matrix[0].length; i++) {
+            result[i] = [];
+            for (let j = 0; j < matrix.length; j++) {
+                result[i][j] = matrix[j][i];
+            }
+        }
+        return result;
+    }
+</script>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Addition - Math Help</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/gauss_eli.css">
+</head>
+<body>
+<header class="header">
+    <div class="logo">
+        <img src="/static/img/logo.jpg" alt="MathHelp Logo">
+    </div>
+    <nav class="nav">
+        <ul>
+            <li><a href="/integration">Integration</a></li>
+            <li><a href="/derivative">Derivative</a></li>
+            <li><a href="/matrix">Matrix </a></li>
+            <li><a href="/about">About Us</a></li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+    <h2>Matrix Addition</h2>
+    <div class="matrix-input-container">
+        <p>Enter the size of the matrices:</p>
+        <input type="number" id="matrix-rows" class="matrix-input" min="1" max="10" placeholder="n">
+        <span> x </span>
+        <input type="number" id="matrix-cols" class="matrix-input" min="1" max="10" placeholder="m">
+    </div>
+    <div class="generate-button-container">
+        <button class="generate-button" onclick="generateMatrices()">Generate Matrices</button>
+    </div>
+    <div class="matrix-container-wrapper">
+        <div class="matrix-container" id="matrix-container-1">
+            <span class="matrix-label">Matrix A:</span>
+            <div id="matrix-1" class="matrix"></div>
+        </div>
+        <div class="matrix-container" id="matrix-container-2">
+            <span class="matrix-label">Matrix B:</span>
+            <div id="matrix-2" class="matrix"></div>
+        </div>
+    </div>
+
+    <div class="generate-button-container">
+        <button class="generate-button" onclick="sendMatricesForAddition()">Add Matrices</button>
+    </div>
+
+    <div class="result-container" id="result-container" style="border: 2px solid blue; box-sizing: border-box;">
+    </div>
+</main>
+<footer>
+    <p>&copy; 2024 Math Help</p>
+</footer>
+<script>
+    function generateMatrices() {
+    const rows = parseInt(document.getElementById("matrix-rows").value);
+    const cols = parseInt(document.getElementById("matrix-cols").value);
+
+    if (rows < 1 || rows > 10 || cols < 1 || cols > 10) {
+        alert("Please enter row and column values between 1 and 10.");
+        return;
+    }
+
+    const matrixContainer1 = document.getElementById("matrix-1");
+    const matrixContainer2 = document.getElementById("matrix-2");
+
+    matrixContainer1.innerHTML = "";
+    matrixContainer2.innerHTML = "";
+
+    let matrixHTML = "<table>";
+    for (let i = 0; i < rows; i++) {
+        matrixHTML += "<tr>";
+        for (let j = 0; j < cols; j++) {
+            matrixHTML += `<td><input type='text' class='matrix-input' id='matrix-1_${i}_${j}'></td>`;
+        }
+        matrixHTML += "</tr>";
+    }
+    matrixHTML += "</table>";
+
+    matrixContainer1.innerHTML = matrixHTML;
+
+    // Correctly generate IDs for the second matrix
+    matrixHTML = "<table>";
+    for (let i = 0; i < rows; i++) {
+        matrixHTML += "<tr>";
+        for (let j = 0; j < cols; j++) {
+            matrixHTML += `<td><input type='text' class='matrix-input' id='matrix-2_${i}_${j}'></td>`;
+        }
+        matrixHTML += "</tr>";
+    }
+    matrixHTML += "</table>";
+
+    matrixContainer2.innerHTML = matrixHTML;
+}
+
+function isValidNumberOrExpression(str) {
+    return str.trim() !== '' && /^[a-zA-Z0-9\s\+\-\*\/\(\)\.eE]*$/.test(str);
+}
+
+function parseCoefficientAndVariable(str) {
+    const match = str.match(/^([0-9]*)([a-zA-Z]*)$/);
+    if (!match) {
+        throw new Error(`Invalid expression: ${str}`);
+    }
+    return {
+        coefficient: match[1] !== '' ? parseInt(match[1]) : 1,
+        variable: match[2] || null
+    };
+}
+
+function sendMatricesForAddition() {
+    const rows = parseInt(document.getElementById("matrix-rows").value);
+    const cols = parseInt(document.getElementById("matrix-cols").value);
+
+    const matrix1 = [];
+    const matrix2 = [];
+
+    for (let i = 0; i < rows; i++) {
+        const row1 = [];
+        const row2 = [];
+        for (let j = 0; j < cols; j++) {
+            const cellValue1 = document.getElementById(`matrix-1_${i}_${j}`).value;
+            const cellValue2 = document.getElementById(`matrix-2_${i}_${j}`).value;
+
+            if (isValidNumberOrExpression(cellValue1)) {
+                row1.push(cellValue1);
+            } else {
+                throw new Error(`Invalid cell value: ${cellValue1}`);
+            }
+
+            if (isValidNumberOrExpression(cellValue2)) {
+                row2.push(cellValue2);
+            } else {
+                throw new Error(`Invalid cell value: ${cellValue2}`);
+            }
+        }
+        matrix1.push(row1);
+        matrix2.push(row2);
+    }
+
+    // Send the matrices to the server
+    fetch('http://localhost:8000/add_matrices', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ matrix1, matrix2 }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        let result = '';
+        if (data.step4 && Array.isArray(data.step4)) {
+            result = data.step4.map((row, i) => row.map((cell, j) => `${matrix1[i][j]} + ${matrix2[i][j]}`));
+        } else {
+            console.error('data.step4 is not an array');
+        }
+        
+        // Handle the response data
+        const resultContainer = document.getElementById("result-container");
+        resultContainer.innerHTML = `
+            <p>\\[${data.step1}\\]</p>
+            <p>\\[${data.step2}\\]</p>
+            <p>\\[${data.step3}\\]</p>
+            <p>\\[${result}\\]</p>
+            <p>\\[${data.step5}\\]</p>
+        `;
+
+        // Update MathJax rendering
+        if (window.MathJax) {
+            MathJax.typeset();
+        }
+    })
+    .catch(error => {
+        alert(error.message);
+    });
+}
+
+</script>
+</body>
+</html>

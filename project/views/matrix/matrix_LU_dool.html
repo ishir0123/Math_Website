@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LU Decomposition - Math Help</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.4.0/math.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/gauss_eli.css">
+</head>
+<body>
+<header class="header">
+    <div class="logo">
+        <img src="/static/img/logo.jpg" alt="MathHelp Logo">
+    </div>
+    <nav class="nav">
+        <ul>
+            <li><a href="/integration">Integration</a></li>
+            <li><a href="/derivative">Derivative</a></li>
+            <li><a href="/matrix">Matrix </a></li>
+            <li><a href="/about">About Us</a></li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+    <h2>LU Decomposition</h2>
+    <div class="matrix-input-container">
+        <p>Enter the size of the matrix:</p>
+        <input type="number" id="matrix-size" class="matrix-input" min="2" max="10" placeholder="n">
+    </div>
+    <div class="generate-button-container">
+        <button class="generate-button" onclick="generateMatrix()">Generate Matrix</button>
+    </div>
+    <div class="matrix-container-wrapper">
+        <div class="matrix-container" id="matrix-container">
+            <span class="matrix-label"></span>
+            <div id="matrix-1" class="matrix"></div>
+        </div>
+    </div>
+
+    <div class="generate-button-container">
+        <button class="generate-button" onclick="performLUDecomposition()">Perform LU Decomposition</button>
+    </div>
+
+    <div class="result-container" id="result-container" style="border: 2px solid blue; box-sizing: border-box;">
+    </div>
+</main>
+<footer>
+    <p>&copy; 2024 Math Help</p>
+</footer>
+<script>
+    function generateMatrix() {
+        const size = parseInt(document.getElementById("matrix-size").value);
+
+        if (size < 2 || size > 10) {
+            alert("Please enter a size between 2 and 10.");
+            return;
+        }
+
+        const matrixContainer = document.getElementById("matrix-1");
+        matrixContainer.innerHTML = "";
+
+        let matrixHTML = "<table>";
+        for (let i = 0; i < size; i++) {
+            matrixHTML += "<tr>";
+            for (let j = 0; j < size; j++) {
+                matrixHTML += `<td><input type='text' class='matrix-input' id='matrix-1_${i}_${j}'></td>`;
+            }
+            matrixHTML += "</tr>";
+        }
+        matrixHTML += "</table>";
+
+        matrixContainer.innerHTML = matrixHTML;
+    }
+
+    function performLUDecomposition() {
+        const resultContainer = document.getElementById("result-container");
+        resultContainer.innerHTML = '';
+        
+        const size = parseInt(document.getElementById("matrix-size").value);
+
+        const matrix = [];
+
+        for (let i = 0; i < size; i++) {
+            matrix[i] = [];
+            for (let j = 0; j < size; j++) {
+                const value = parseFloat(document.getElementById(`matrix-1_${i}_${j}`).value);
+                if (isNaN(value)) {
+                    alert("Please enter valid numbers in all matrix cells.");
+                    return;
+                }
+                matrix[i][j] = value;
+            }
+        }
+
+        // Display Matrix A (Original Matrix)
+        displayMatrix("A", matrix);
+
+        // Display descriptions of L and U matrices
+        displayMatrix("L", [], generateLDescription(size), true);
+        displayMatrix("U", [], generateUDescription(size), true);
+
+        const { L, U } = luDecomposition(matrix, size);
+
+        // Display L and U matrix solutions
+        displayMatrix("L", L);
+        displayMatrix("U", U);
+
+        // Generate description for the product of L and U matrices
+        const LUProductDescription = simulateMatrixMultiplication(size);
+
+        // Display the description of the product of L and U matrices
+        displayMatrix("LU Product", [], LUProductDescription, true);
+    }
+
+
+    function luDecomposition(mat, n) {
+        let lower = Array.from({ length: n }, () => Array(n).fill(0));
+        let upper = Array.from({ length: n }, () => Array(n).fill(0));
+
+        for (let i = 0; i < n; i++) {
+            for (let k = i; k < n; k++) {
+                let sum = 0;
+                for (let j = 0; j < i; j++) {
+                    sum += (lower[i][j] * upper[j][k]);
+                }
+                upper[i][k] = mat[i][k] - sum;
+            }
+
+            for (let k = i; k < n; k++) {
+                if (i === k) {
+                    lower[i][i] = 1;
+                } else {
+                    let sum = 0;
+                    for (let j = 0; j < i; j++) {
+                        sum += (lower[k][j] * upper[j][i]);
+                    }
+                    lower[k][i] = (mat[k][i] - sum) / upper[i][i];
+                }
+            }
+        }
+
+        return { L: lower, U: upper };
+    }
+
+    function displayMatrix(label, matrix, description = "", isDescription = false) {
+        const resultContainer = document.getElementById("result-container");
+        const matrixElement = document.createElement('div');
+        if (isDescription) {
+            matrixElement.innerHTML = `<p>${description}</p>`;
+        } else {
+            matrixElement.innerHTML = `\\[ \\mathbf{${label}} = ${matrixToString(matrix)} \\]`;
+            if (description) {
+                matrixElement.innerHTML += `<p>${description}</p>`;
+            }
+        }
+        resultContainer.appendChild(matrixElement);
+
+        MathJax.startup.promise.then(() => {
+            MathJax.typesetPromise([matrixElement]);
+        }).catch((err) => console.log(err));
+    }
+
+
+    function matrixToString(matrix) {
+        let matrixString = "\\begin{bmatrix}\n";
+        for (let i = 0; i < matrix.length; i++) {
+            matrixString += matrix[i].join(" & ") + " \\\\\n";
+        }
+        matrixString += "\\end{bmatrix}";
+        return matrixString;
+    }
+
+    function generateLDescription(size) {
+        let description = "General form of L and U matrix are given by: \n\n";
+        description += "\\[ \\mathbf{L} = \\begin{bmatrix}\n";
+        for (let i = 1; i <= size; i++) {
+            for (let j = 1; j <= size; j++) {
+                if (j <= i) {
+                    if (j === i) {
+                        description += "1 & ";
+                    } else {
+                        description += `l_{${i}${j}} & `;
+                    }
+                } else {
+                    description += "0 & ";
+                }
+            }
+            description = description.slice(0, -2); // Remove the last '& '
+            description += " \\\\\n";
+        }
+        description += "\\end{bmatrix} \\]";
+        return description;
+    }   
+    
+    function generateUDescription(size) {
+        let description = "";
+        description += "\\[ \\mathbf{U} = \\begin{bmatrix}\n";
+        for (let i = 1; i <= size; i++) {
+            for (let j = 1; j <= size; j++) {
+                if (j >= i) {
+                    description += `u_{${i}${j}} & `;
+                } else {
+                    description += "0 & ";
+                }
+            }
+            description = description.slice(0, -2); // Remove the last '& '
+            description += " \\\\\n";
+        }
+        description += "\\end{bmatrix} \\]";
+        return description;
+    }
+</script>
+</body>
+</html>
